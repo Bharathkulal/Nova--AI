@@ -1,8 +1,16 @@
 from ai.gemini import generate_response as gemini_generate
 from ai.openai_client import generate_response as openai_generate
+from ai.groq_client import generate_response as groq_generate
 
 def get_ai_response(messages, system_prompt, provider='gemini', api_key=None):
-    if provider == 'openai':
+    if provider == 'groq':
+        response = groq_generate(messages, system_prompt, api_key)
+        if response.startswith('Groq Error:') or response.startswith('Error:'):
+            fallback = gemini_generate(messages, system_prompt, None)
+            if not fallback.startswith('Error:') and not fallback.startswith('Gemini Error:'):
+                return fallback
+        return response
+    elif provider == 'openai':
         response = openai_generate(messages, system_prompt, api_key)
         # Fallback to gemini if openai fails
         if response.startswith('OpenAI Error:') or response.startswith('Error:'):

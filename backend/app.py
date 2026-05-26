@@ -16,9 +16,18 @@ def create_app(config_class=Config):
     db.init_app(app)
     jwt.init_app(app)
     
-    # Configure CORS based on frontend URL
-    frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
-    cors.init_app(app, resources={r"/api/*": {"origins": frontend_url}})
+    # Configure CORS - Allow all origins from localhost for development
+    cors.init_app(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"],
+                "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+                "allow_headers": ["Content-Type", "Authorization"],
+                "supports_credentials": True
+            }
+        }
+    )
 
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
